@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 3.13.0
+
+- Added `swarmvault quickstart <input>` as the beginner-friendly first-run command over the existing scan implementation, including `--no-serve`, `--no-viz`, `--mcp`, and public GitHub checkout flags.
+- Improved quickstart/scan human output so first-time users can see the vault root, raw source directory, wiki directory, graph JSON path, share artifacts, and useful next commands.
+- Simplified the OSS README trio, CLI README, site quickstart, CLI docs, and ClawHub skill bundle around a beginner-first flow while keeping advanced graph, context, task, chat, export, and automation commands discoverable.
+- Extended parser-backed CLI surface smoke and skill validation material to cover the new quickstart command.
+- Bumped OSS packages, viewer, Obsidian plugin metadata, MCP-facing version, and ClawHub skill metadata to `3.13.0`.
+
 ## 3.12.0
 
 - Added `swarmvault chat` for persisted multi-turn conversations over the compiled wiki, including resume, list, delete, interactive TTY controls, and optional saved query outputs.

@@ -35,6 +35,8 @@ const requiredSubstrings = [
   "npm install -g @swarmvaultai/cli",
   "swarmvault --version",
   "npm install -g @swarmvaultai/cli@latest",
+  "swarmvault quickstart ./your-repo",
+  "swarmvault quickstart ./path --no-serve",
   "swarmvault init --obsidian",
   "swarmvault source add https://github.com/karpathy/micrograd",
   "swarmvault source add https://example.com/docs/getting-started",

@@ -127,9 +127,9 @@ program
 function readCliVersion(): string {
   try {
     const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version?: string };
-    return typeof packageJson.version === "string" && packageJson.version.trim() ? packageJson.version : "3.12.0";
+    return typeof packageJson.version === "string" && packageJson.version.trim() ? packageJson.version : "3.13.0";
   } catch {
-    return "3.12.0";
+    return "3.13.0";
   }
 }
 
@@ -477,10 +477,19 @@ async function runScanCommand(
   const shareKitPath = path.join(paths.wikiDir, "graph", "share-kit");
   if (!isJson()) {
     log(`Compiled ${compiled.sourceCount} source(s), ${compiled.pageCount} page(s).`);
+    log(`Vault workspace: ${rootDir}`);
+    log(`Raw sources: ${paths.rawDir}`);
+    log(`Wiki output: ${paths.wikiDir}`);
+    log(`Graph JSON: ${paths.graphPath}`);
     log(`Share card: ${shareCardPath}`);
     log(`Visual card: ${shareCardSvgPath}`);
     log(`Share kit: ${shareKitPath}`);
-    log("Post text: swarmvault graph share --post");
+    log("");
+    log("Next steps:");
+    log('  swarmvault query "What are the key concepts?"');
+    log("  swarmvault graph serve");
+    log("  swarmvault doctor");
+    log("  swarmvault candidate list");
   }
 
   if (options.mcp) {
@@ -653,6 +662,19 @@ program.hook("postAction", async (_thisCommand, actionCommand) => {
     emitNotice(notice);
   }
 });
+
+program
+  .command("quickstart")
+  .description("Beginner path: initialize, ingest, compile, and optionally open the graph viewer in one command.")
+  .argument("<input>", "Directory or public GitHub repo root URL to turn into a vault")
+  .option("--port <port>", "Port for the graph viewer")
+  .option("--no-serve", "Skip launching the graph viewer after compile")
+  .option("--no-viz", "Compatibility alias for --no-serve; skip launching the graph viewer after compile")
+  .option("--mcp", "Start the MCP stdio server after compile instead of launching the graph viewer", false)
+  .option("--branch <name>", "GitHub branch to clone when the input is a public repo URL")
+  .option("--ref <ref>", "Git ref, tag, or commit to check out when the input is a public repo URL")
+  .option("--checkout-dir <path>", "Persistent checkout directory for a public GitHub repo input")
+  .action(runScanCommand);
 
 program
   .command("init")

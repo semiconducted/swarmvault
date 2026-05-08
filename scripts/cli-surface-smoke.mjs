@@ -85,6 +85,7 @@ const SURFACE_MANIFEST = {
   migrate: "behavior",
   provider: "help",
   "provider setup": "behavior",
+  quickstart: "behavior",
   query: "behavior",
   retrieval: "help",
   "retrieval doctor": "behavior",
@@ -552,6 +553,13 @@ async function runBehaviorSmoke() {
   await fs.writeFile(path.join(scanInput, "README.md"), "# Scan Input\n\nScan smoke.\n", "utf8");
   await runJsonCheck(["scan", scanInput, "--no-viz"], scanWorkspace, "scan", (result) => {
     assert.ok(result.compiled?.sourceCount >= 1, "scan --no-viz did not compile the input");
+  });
+
+  const quickstartWorkspace = path.join(scanDir, "quickstart-workspace");
+  await fs.mkdir(quickstartWorkspace, { recursive: true });
+  await runJsonCheck(["quickstart", scanInput, "--no-serve"], quickstartWorkspace, "quickstart", (result) => {
+    assert.ok(result.compiled?.sourceCount >= 1, "quickstart --no-serve did not compile the input");
+    assert.ok(typeof result.shareKitPath === "string", "quickstart did not return share kit path");
   });
 
   const cloneWorkspace = path.join(scanDir, "clone-workspace");

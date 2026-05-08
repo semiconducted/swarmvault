@@ -953,7 +953,7 @@ describe("swarmvault workflow", () => {
     ]);
     const sharePreview = await fs.readFile(path.join(shareKitDir, "share-preview.html"), "utf8");
     expect(sharePreview).toContain("<!doctype html>");
-    expect(sharePreview).toContain("npm install -g @swarmvaultai/cli && swarmvault scan ./your-repo");
+    expect(sharePreview).toContain("npm install -g @swarmvaultai/cli && swarmvault quickstart ./your-repo");
     const shareArtifact = JSON.parse(await fs.readFile(path.join(shareKitDir, "share-artifact.json"), "utf8")) as {
       vaultName?: string;
       overview?: { sources?: number };

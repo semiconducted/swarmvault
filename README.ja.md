@@ -10,7 +10,7 @@
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)]()
 
-**AI エージェント向けのローカルファーストな知識コンパイラ**、[LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) パターンに基づいて構築。多くの「ドキュメントと会話する」ツールは、質問に答えたあと作業を捨ててしまいます。SwarmVault は生のソースとあなたの間に**永続的な wiki** を維持します —— LLM が記録整理を行い、あなたは思考に集中できます。
+**AI エージェント向けのローカルファーストな LLM Wiki、ナレッジグラフビルダー、RAG 知識ベース。** SwarmVault はドキュメント、コード、書き起こし、ノート、URL を、永続的な Markdown wiki とローカルグラフに変換します。まずは 1 コマンドで始め、必要になったら graph、review、context pack、automation を少しずつ学べます。
 
 ウェブサイトのドキュメントは現在 English-first です。各言語版で表現に差が出た場合は [README.md](README.md) を正としてください。
 
@@ -19,41 +19,37 @@
 
 ```bash
 npm install -g @swarmvaultai/cli
-swarmvault scan ./your-repo       # 自分のコードベースやドキュメントを指定
-# → ナレッジグラフがブラウザで開きます
+swarmvault quickstart ./your-repo
 ```
 
-各 compile は、投稿、リンク共有、スクリーンショット向けの portable share kit も生成します：
+`quickstart` は現在のディレクトリで vault を初期化し、入力を取り込み、wiki と graph を compile し、share artifacts を生成してローカル graph viewer を開きます。`swarmvault scan` の初心者向け alias です。
 
-```bash
-swarmvault graph share --post
-swarmvault graph share --svg ./share-card.svg
-swarmvault graph share --bundle ./share-kit
-swarmvault context build "Ship this feature safely" --target ./src
-swarmvault task start "Ship this feature safely" --target ./src
-swarmvault doctor
-```
-
-手元にリポジトリがない場合は、組み込みデモをお試しください —— 3 つのサンプルソースで vault を作成し、グラフビューアを開きます：
+手元にリポジトリがない場合:
 
 ```bash
 swarmvault demo
 ```
 
+最初の compile 後によく使う次のコマンド:
+
+```bash
+swarmvault query "What are the key concepts?"
+swarmvault graph serve
+swarmvault doctor
+swarmvault candidate list
+```
+
 ![SwarmVault graph workspace](https://www.swarmvault.ai/images/screenshots/graph-workspace.png)
 
-この 1 コマンドで vault を初期化し、ソースを取り込み、ナレッジグラフをコンパイルし、インタラクティブビューアを開きます。API キー不要 —— 組み込みの heuristic provider は完全にオフラインで動作します。
+最初の実行に API key は不要です。組み込みの heuristic provider はローカルかつオフラインで動作します。
 
 **ディスク上に生成されるもの：**
 
-- **ナレッジグラフ** —— 型付きノード（sources, concepts, entities, code modules）と出典追跡エッジ
-- **検索可能な wiki ページ** —— ソース要約、コンセプトページ、エンティティページ、相互参照
-- **矛盾検出** —— ソース間の相反する主張を自動フラグ
-- **グラフレポート** —— サプライズスコアリング、god nodes、コミュニティ検出、平易な解説
-- **Share kit** —— `wiki/graph/share-card.md`、`wiki/graph/share-card.svg`、`wiki/graph/share-kit/`、`swarmvault graph share --post`、`swarmvault graph share --svg`、`swarmvault graph share --bundle` によるコピー可能、視覚的、HTML preview 付きの初回サマリー
-- **Context packs** —— 目的、対象、token 予算に合わせた agent-ready な evidence bundle を `wiki/context/` と `state/context-packs/` に保存
-- **Agent task ledger** —— `swarmvault task start|update|finish|resume` がローカルで git-friendly な task history を `wiki/memory/` と `state/memory/` に保存します。`memory` は互換 alias として残ります
-- **Vault doctor とワークベンチ** —— `swarmvault doctor [--repair]`、MCP `doctor_vault`、グラフビューアのワークベンチが graph、retrieval、review、watch、migration、managed sources、task state をまとめて確認し、優先度付き next action、詳細な checks、コピー可能なコマンド、安全な repair、明示的な capture mode、budget 付き agent handoff を表示します
+- `raw/` - 取り込んだ素材の不変コピー
+- `wiki/` - 生成された Markdown ページ、保存済み出力、グラフレポート、context packs、task notes
+- `state/graph.json` - 機械可読のナレッジグラフ
+- `state/retrieval/` - ローカル検索インデックス
+- `wiki/graph/share-card.md`、`wiki/graph/share-card.svg`、`wiki/graph/share-kit/` - コピー可能で視覚的な初回サマリー
 
 ### 三層アーキテクチャ
 
@@ -89,7 +85,7 @@ Karpathy の [LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9
 |---|:---:|:---:|
 | 三層アーキテクチャ | 記述 | **実装済み** |
 | Ingest / query / lint | 手動 | **CLI コマンド** |
-| 1 コマンドで起動 | — | **`swarmvault scan`** |
+| 1 コマンドで起動 | — | **`swarmvault quickstart`** |
 | 型付きナレッジグラフ | — | **あり** |
 | インタラクティブグラフビューア | — | **あり** |
 | ビジュアル + 投稿しやすい share kit | — | **あり** |
@@ -141,6 +137,18 @@ npm install -g @swarmvaultai/cli@latest
 <!-- readme-section:quickstart -->
 ## クイックスタート
 
+### 最速パス
+
+vault artifacts を置きたい空フォルダまたは scratch フォルダで実行します:
+
+```bash
+mkdir my-vault
+cd my-vault
+swarmvault quickstart ../your-repo
+```
+
+これが新規ユーザーにとって一番簡単な入口です。`swarmvault scan` と同じ実行パスで、vault の初期化、入力の取り込み、wiki と graph の compile、share artifacts の生成を行い、`--no-serve` または `--no-viz` がない場合は graph viewer を開きます。
+
 ```text
 my-vault/
 ├── swarmvault.schema.md       ユーザーが編集するボルト指示ファイル
@@ -151,71 +159,47 @@ my-vault/
 └── agent/                     エージェント向けに生成される補助ファイル
 ```
 
-生成される vault artifacts をプロジェクトルートの外に置きたい場合は、`SWARMVAULT_OUT=.swarmvault-out` を設定します。scratch worktree や package smoke test に便利です。`swarmvault.config.json` と `swarmvault.schema.md` はプロジェクトルートに残り、相対 `raw/`、`wiki/`、`state/`、`agent/`、`inbox/` は出力ディレクトリ配下に解決されます。
+生成 artifacts をソースツリーの外に置きたい場合は、`SWARMVAULT_OUT=.swarmvault-out` を使います。`swarmvault.config.json` と `swarmvault.schema.md` はプロジェクトルートに残り、`raw/`、`wiki/`、`state/`、`agent/`、`inbox/` は出力ディレクトリ配下に解決されます。
+
+### メインループを学ぶ
+
+最速パスが分かったら、同じ流れをステップごとに実行できます:
 
 ```bash
-# フルワークフロー — ステップバイステップ
 swarmvault init --obsidian --profile personal-research
-swarmvault source add https://github.com/karpathy/micrograd
-swarmvault source add https://github.com/owner/repo --branch main --checkout-dir .swarmvault-checkouts/repo
-swarmvault source add https://example.com/docs/getting-started
-swarmvault ingest ./meeting.srt --guide
-swarmvault ingest ./customer-call.mp3
-swarmvault ingest https://www.youtube.com/watch?v=dQw4w9WgXcQ
-swarmvault ingest --video https://example.com/product-demo.mp4
-swarmvault source session transcript-or-session-id
 swarmvault ingest ./src --repo-root .
+swarmvault ingest ./meeting.srt --guide
 swarmvault add https://arxiv.org/abs/2401.12345
 swarmvault compile
-swarmvault diff
-swarmvault graph share --post
-swarmvault graph share --svg ./share-card.svg
-swarmvault graph share --bundle ./share-kit
-swarmvault graph blast ./src/index.ts
-swarmvault graph status ./src
-swarmvault check-update ./src
-swarmvault graph stats
-swarmvault graph validate --strict
-swarmvault update ./src
-swarmvault graph cluster
-swarmvault cluster-only
-swarmvault graph tree --output ./exports/tree.html
-swarmvault tree --output ./exports/tree.html
-swarmvault graph query "auth calls" --context calls --evidence extracted --language typescript
 swarmvault query "What is the auth flow?"
-swarmvault chat "How should the next agent use this vault?"
-swarmvault export ai --out ./exports/ai
-swarmvault context build "Implement the auth refactor" --target ./src --budget 8000
-swarmvault task start "Implement the auth refactor" --target ./src --agent codex
-swarmvault retrieval status
-swarmvault doctor --repair
 swarmvault graph serve
-swarmvault graph export --report ./exports/report.html
-swarmvault graph export --obsidian ./exports/graph-vault
-swarmvault graph export --neo4j ./exports/graph.cypher
-swarmvault graph merge ./exports/graph.json ./other-graph.json --out ./exports/merged-graph.json
-swarmvault merge-graphs ./exports/graph.json ./other-graph.json --out ./exports/merged-graph.json
-swarmvault graph push neo4j --dry-run
-swarmvault clone https://github.com/owner/repo --no-viz
 ```
 
-ローカル repo、公開 GitHub repo、docs ツリーを最短で一度見たい場合は、`swarmvault scan ./path --no-serve`、`swarmvault scan ./path --no-viz`、または `swarmvault clone https://github.com/owner/repo --branch main --no-viz` を使います。現在のディレクトリを vault として初期化し、その入力を取り込み、compile まで実行し、artifacts だけ必要な場合はグラフビューアを起動しません。compile 後に MCP stdio server に入る場合は `scan --mcp` または `clone --mcp` を使います。`wiki/graph/share-card.md`、`wiki/graph/share-card.svg`、`wiki/graph/share-kit/` も残るため、`swarmvault graph share --post` で短い共有用サマリーを出力し、`swarmvault graph share --svg ./share-card.svg` でビジュアルカードを生成し、`swarmvault graph share --bundle ./share-kit` で markdown、投稿テキスト、SVG、自包含 HTML preview、JSON metadata を含む portable folder を作成できます。
+同じ repo、folder、docs hub を継続的に登録して refresh したい場合は、`swarmvault source add https://github.com/karpathy/micrograd`、`swarmvault source add https://example.com/docs/getting-started`、`swarmvault source list`、`swarmvault source reload --all`、`swarmvault source session transcript-or-session-id` を使います。公開 GitHub repo には `swarmvault clone https://github.com/owner/repo --no-viz`、または checkout を再利用する `swarmvault source add https://github.com/owner/repo --branch main --checkout-dir .swarmvault-checkouts/repo` が使えます。
 
-`swarmvault context build "<goal>" --target <path-or-node> --budget <tokens>` は、次の agent 作業に必要なページ、ノード、エッジ、根拠を token 予算内にまとめます。出力形式は `--format markdown|json|llms` で選べ、保存済み bundle は `swarmvault context list` と `swarmvault context show <id>` で再利用できます。長めの作業では `swarmvault task start "<goal>" --target <path-or-node>` で永続 task ledger を作成し、`task update` で notes、decisions、changed paths、linked packs を記録し、`task resume <id>` で次の agent 向け handoff を出力します。既存の `memory` commands と `--memory <id>` flags は同じ task ledger の互換 alias として残ります。
+### よく使う次のコマンド
 
-引き継げる会話が必要な場合は、`swarmvault chat "What should I do next?"` を使います。compile 済み wiki に対して回答し、transcript を `wiki/outputs/chat-sessions/` に、構造化 state を `state/chat-sessions/` に保存します。続きは `swarmvault chat --resume <id> "follow-up"` で再開できます。保存済み session は `swarmvault chat --list` と `swarmvault chat --delete <id>` で管理します。
+| 目的 | コマンド |
+| --- | --- |
+| viewer を開かず初心者パスを実行 | `swarmvault quickstart ./path --no-serve` |
+| 既存の短い alias を使う | `swarmvault scan ./path --no-viz` |
+| graph freshness を確認 | `swarmvault graph status ./src` または `swarmvault check-update ./src` |
+| コード由来 graph artifacts を更新 | `swarmvault update ./src` |
+| graph communities を再計算 | `swarmvault graph cluster` または `swarmvault cluster-only` |
+| graph counts と export validation | `swarmvault graph stats` と `swarmvault graph validate --strict` |
+| 初回サマリーを共有 | `swarmvault graph share --post`、`swarmvault graph share --svg ./share-card.svg`、`swarmvault graph share --bundle ./share-kit` |
+| agents や他ツール向けに export | `swarmvault export ai --out ./exports/ai` |
+| bounded agent context を作る | `swarmvault context build "Implement the auth refactor" --target ./src --budget 8000` |
+| task history を記録 | `swarmvault task start "Implement the auth refactor" --target ./src --agent codex` |
+| vault 上の会話を保存 | `swarmvault chat "How should the next agent use this vault?"` |
+| health と repair guidance を見る | `swarmvault doctor --repair` |
+| graph exports を作る | `swarmvault graph export --report ./exports/report.html`、`swarmvault graph export --obsidian ./exports/graph-vault`、`swarmvault graph export --neo4j ./exports/graph.cypher` |
+| source/module tree を見る、または merge | `swarmvault tree --output ./exports/tree.html` と `swarmvault merge-graphs ./exports/graph.json ./other-graph.json --out ./exports/merged-graph.json` |
+| graph data を Neo4j に送る | `swarmvault graph push neo4j --dry-run` |
 
-別 agent や crawler に静的 handoff を渡す場合は、`swarmvault export ai --out ./exports/ai` を使います。`llms.txt`、`llms-full.txt`、`graph.jsonld`、`manifest.json`、`ai-readme.md`、各ページの `.txt`/`.json` sibling を生成するので、server を起動せずに compile 済み wiki を読めます。
+最小の LLM-Wiki starter が欲しい場合は、`swarmvault init --lite` が `raw/`、`wiki/`、`wiki/index.md`、`wiki/log.md`、`swarmvault.schema.md` だけを作ります。config、state、agent installs は作りません。
 
-agent に渡す前や viewer を開く前に素早く状態を見るには、`swarmvault doctor` を使います。graph、retrieval、review queue、watch status、migration state、managed sources、task ledger を確認し、`--repair` では安全に再生成できる retrieval artifacts を rebuild します。`swarmvault graph serve` のワークベンチは優先度付き next action、全 doctor check、詳細、コピー可能な推奨コマンドを表示し、安全な直接 repair、明示的な capture mode、title/tag capture fields、context-pack 作成、token budget 付き task-start actions を実行できます。
-
-実データを入れる前にゼロ設定の体験をしたい場合は、`swarmvault demo --no-serve` も使えます。内蔵ソースを持つ一時的な sample vault を作成し、そのまま compile します。
-
-とても大きなグラフでは、`swarmvault graph serve` と `swarmvault graph export --html` は自動で overview mode で始まります。全面表示したい場合は `--full` を付けてください。
-
-vault が git リポジトリ内にある場合、`ingest`、`compile`、`query` は `--commit` も受け付け、生成された `wiki/` と `state/` の変更をすぐ commit できます。`compile --max-tokens <n>` は、コンテキスト窓を制約したいときに優先度の低いページを落として出力を抑えます。
-
-`swarmvault init --profile` は `default`、`personal-research`、そして `reader,timeline` のようなカンマ区切り preset list を受け付けます。`personal-research` の preset は `profile.guidedIngestDefault` と `profile.deepLintDefault` を両方有効にするので、ingest/source と lint は `--no-guide` や `--no-deep` を付けない限り強いパスで始まります。独自のボルト挙動にしたい場合は `swarmvault.config.json` の `profile` ブロックを編集し、`swarmvault.schema.md` は人間が書く意図レイヤーとして使い続けてください。
+vault が git repo 内にある場合、`ingest`、`compile`、`query` は `--commit` を受け付けます。`compile --max-tokens <n>` は bounded context windows 向けに低優先度ページを削ります。`swarmvault ingest ./customer-call.mp3`、`swarmvault ingest https://www.youtube.com/watch?v=dQw4w9WgXcQ`、`swarmvault ingest --video https://example.com/product-demo.mp4` は、必要な provider または helper binary がある場合に audio、YouTube transcript、video workflows を扱います。
 
 <!-- readme-section:provider-setup -->
 ## 任意: モデルプロバイダーを追加

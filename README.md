@@ -10,7 +10,7 @@
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)]()
 
-**The local-first LLM Wiki, knowledge graph builder, and RAG knowledge base for AI agents** — built on Andrej Karpathy's [LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern. SwarmVault is an open-source knowledge compiler that turns docs, code, transcripts, and notes into a persistent, locally hosted knowledge graph, RAG pipeline, and agent memory store. Think of it as an Obsidian alternative for personal knowledge management, an AI second brain, and durable Claude Code / Codex / OpenClaw memory — all on disk, all yours. Most "chat with your docs" tools answer a question and throw away the work. SwarmVault keeps a **durable wiki** between you and raw sources — the LLM does the bookkeeping, you do the thinking.
+**The local-first LLM Wiki, knowledge graph builder, and RAG knowledge base for AI agents.** SwarmVault turns docs, code, transcripts, notes, and URLs into a durable markdown wiki plus a local graph you can inspect, query, and hand to agents. Start with one command, then learn the deeper graph, review, context-pack, and automation workflows when you need them.
 
 Documentation on the website is currently English-first. If wording drifts between translations, [README.md](README.md) is the canonical source.
 
@@ -19,42 +19,37 @@ Documentation on the website is currently English-first. If wording drifts betwe
 
 ```bash
 npm install -g @swarmvaultai/cli
-swarmvault scan ./your-repo       # point it at your own codebase or docs
-# → knowledge graph opens in your browser
+swarmvault quickstart ./your-repo
 ```
 
-Each compile also writes a portable share kit for posting, linking, or screenshotting:
+`quickstart` initializes a vault in the current directory, ingests the input, compiles the wiki and graph, writes share artifacts, and opens the local graph viewer. It is the beginner-friendly alias for `swarmvault scan`.
 
-```bash
-swarmvault graph share --post
-swarmvault graph share --svg ./share-card.svg
-swarmvault graph share --bundle ./share-kit
-swarmvault context build "Ship this feature safely" --target ./src
-swarmvault task start "Ship this feature safely" --target ./src
-swarmvault doctor
-```
-
-No repo handy? Try the built-in demo — creates a sample vault with three sources and opens the graph viewer:
+No repo handy?
 
 ```bash
 swarmvault demo
 ```
 
+After your first compile, the most useful next commands are:
+
+```bash
+swarmvault query "What are the key concepts?"
+swarmvault graph serve
+swarmvault doctor
+swarmvault candidate list
+```
+
 ![SwarmVault graph workspace](https://www.swarmvault.ai/images/screenshots/graph-workspace.png)
 
-That single command initializes a vault, ingests sources, compiles a knowledge graph, and opens an interactive viewer. No API keys needed — the built-in heuristic provider runs fully offline.
+No API keys are required for the first run. The built-in heuristic provider runs locally and offline.
 
 **What you get on disk:**
 
-- **Knowledge graph** with typed nodes (sources, concepts, entities, code modules) and provenance-tracked edges
-- **Searchable wiki pages** — source summaries, concept pages, entity pages, cross-references
-- **Contradiction detection** — conflicting claims across sources flagged automatically
-- **Graph report** — surprise scoring, god nodes, community detection, plain-English explanations
-- **Share kit** — `wiki/graph/share-card.md`, `wiki/graph/share-card.svg`, `wiki/graph/share-kit/`, `swarmvault graph share --post`, `swarmvault graph share --svg`, and `swarmvault graph share --bundle` for copyable, visual, and HTML-preview first-run summaries
-- **Context packs** — `swarmvault context build "<goal>"` writes a cited, token-bounded agent handoff under `wiki/context/` plus `state/context-packs/`
-- **Chat sessions and AI export packs** — `swarmvault chat` persists multi-turn transcripts under `wiki/outputs/chat-sessions/` plus `state/chat-sessions/`, while `swarmvault export ai` writes `llms.txt`, full-text, JSON-LD, manifest, and per-page siblings for static agent handoff
-- **Agent task ledger** — `swarmvault task start|update|finish|resume` records durable local task history under `wiki/memory/` plus `state/memory/`; `memory` remains a compatibility alias
-- **Vault doctor and workbench** — `swarmvault doctor [--repair]`, MCP `doctor_vault`, and the graph viewer workbench inspect graph, retrieval, reviews, watch state, migrations, managed sources, and task state, with prioritized next actions, detailed checks, copyable commands, safe repair, explicit capture modes, and budgeted agent handoffs
+- `raw/` - immutable copies of ingested material
+- `wiki/` - generated markdown pages, saved outputs, graph reports, context packs, and task notes
+- `state/graph.json` - the machine-readable knowledge graph
+- `state/retrieval/` - local search index
+- `wiki/graph/share-card.md`, `wiki/graph/share-card.svg`, and `wiki/graph/share-kit/` - copyable and visual first-run summaries
 
 ### Three-Layer Architecture
 
@@ -90,7 +85,7 @@ If you liked Karpathy's [LLM Wiki gist](https://gist.github.com/karpathy/442a6bf
 |---|:---:|:---:|
 | Three-layer architecture | described | **implemented** |
 | Ingest / query / lint | manual | **CLI commands** |
-| One-command setup | — | **`swarmvault scan`** |
+| One-command setup | — | **`swarmvault quickstart`** |
 | Typed knowledge graph | — | **yes** |
 | Interactive graph viewer | — | **yes** |
 | Visual + post-ready share kit | — | **yes** |
@@ -142,6 +137,18 @@ The global CLI already includes the graph viewer workflow and MCP server flow. E
 <!-- readme-section:quickstart -->
 ## Quickstart
 
+### Fast Path
+
+Run this from an empty folder or a scratch folder where you want the vault artifacts to live:
+
+```bash
+mkdir my-vault
+cd my-vault
+swarmvault quickstart ../your-repo
+```
+
+That is the easiest path for a new user. It does the same work as `swarmvault scan`: initialize the vault, ingest the input, compile the wiki and graph, write share artifacts, and open the graph viewer unless you pass `--no-serve` or `--no-viz`.
+
 ```text
 my-vault/
 ├── swarmvault.schema.md       user-editable vault instructions
@@ -152,71 +159,47 @@ my-vault/
 └── agent/                     generated agent-facing helpers
 ```
 
-Set `SWARMVAULT_OUT=.swarmvault-out` when generated vault artifacts should live outside the project root, such as in scratch worktrees or package smoke tests. `swarmvault.config.json` and `swarmvault.schema.md` stay in the project root; relative `raw/`, `wiki/`, `state/`, `agent/`, and `inbox/` paths resolve under the output directory.
+If you want to keep generated artifacts outside the source tree, run with `SWARMVAULT_OUT=.swarmvault-out`. `swarmvault.config.json` and `swarmvault.schema.md` stay in the project root; `raw/`, `wiki/`, `state/`, `agent/`, and `inbox/` resolve under the output directory.
+
+### Learn The Main Loop
+
+Once the fast path makes sense, the same workflow can be run step by step:
 
 ```bash
-# Full workflow — step by step
 swarmvault init --obsidian --profile personal-research
-swarmvault source add https://github.com/karpathy/micrograd
-swarmvault source add https://github.com/owner/repo --branch main --checkout-dir .swarmvault-checkouts/repo
-swarmvault source add https://example.com/docs/getting-started
-swarmvault ingest ./meeting.srt --guide
-swarmvault ingest ./customer-call.mp3
-swarmvault ingest https://www.youtube.com/watch?v=dQw4w9WgXcQ
-swarmvault ingest --video https://example.com/product-demo.mp4
-swarmvault source session transcript-or-session-id
 swarmvault ingest ./src --repo-root .
+swarmvault ingest ./meeting.srt --guide
 swarmvault add https://arxiv.org/abs/2401.12345
 swarmvault compile
-swarmvault diff
-swarmvault graph share --post
-swarmvault graph share --svg ./share-card.svg
-swarmvault graph share --bundle ./share-kit
-swarmvault graph blast ./src/index.ts
-swarmvault graph status ./src
-swarmvault check-update ./src
-swarmvault graph stats
-swarmvault graph validate --strict
-swarmvault update ./src
-swarmvault graph cluster
-swarmvault cluster-only
-swarmvault graph tree --output ./exports/tree.html
-swarmvault tree --output ./exports/tree.html
-swarmvault graph query "auth calls" --context calls --evidence extracted --language typescript
 swarmvault query "What is the auth flow?"
-swarmvault chat "How should the next agent use this vault?"
-swarmvault export ai --out ./exports/ai
-swarmvault context build "Implement the auth refactor" --target ./src --budget 8000
-swarmvault task start "Implement the auth refactor" --target ./src --agent codex
-swarmvault retrieval status
-swarmvault doctor --repair
 swarmvault graph serve
-swarmvault graph export --report ./exports/report.html
-swarmvault graph export --obsidian ./exports/graph-vault
-swarmvault graph export --neo4j ./exports/graph.cypher
-swarmvault graph merge ./exports/graph.json ./other-graph.json --out ./exports/merged-graph.json
-swarmvault merge-graphs ./exports/graph.json ./other-graph.json --out ./exports/merged-graph.json
-swarmvault graph push neo4j --dry-run
-swarmvault clone https://github.com/owner/repo --no-viz
 ```
 
-Need the fastest first pass over a local repo, public GitHub repo, or docs tree? `swarmvault scan ./path --no-serve`, `swarmvault scan ./path --no-viz`, or `swarmvault clone https://github.com/owner/repo --branch main --no-viz` initializes the current directory as a vault, ingests that input, compiles it, and skips opening the graph viewer when you only want the artifacts. Use `scan --mcp` or `clone --mcp` when the next step should be an MCP stdio server instead of the viewer. It also leaves `wiki/graph/share-card.md`, `wiki/graph/share-card.svg`, and `wiki/graph/share-kit/` behind so you can run `swarmvault graph share --post` for compact text, `swarmvault graph share --svg ./share-card.svg` for a visual card, or `swarmvault graph share --bundle ./share-kit` for a portable folder with markdown, post text, SVG, a self-contained HTML preview, and JSON metadata.
+Use `swarmvault source add https://github.com/karpathy/micrograd`, `swarmvault source add https://example.com/docs/getting-started`, `swarmvault source list`, `swarmvault source reload --all`, and `swarmvault source session transcript-or-session-id` when the same repo, folder, or docs hub should stay registered and refreshable. For public GitHub repos, `swarmvault clone https://github.com/owner/repo --no-viz` and `swarmvault source add https://github.com/owner/repo --branch main --checkout-dir .swarmvault-checkouts/repo` are the reusable checkout paths.
 
-Need to hand bounded context to an agent? `swarmvault context build "Ship this feature safely" --target ./src --budget 8000` combines graph traversal, local search hits, freshness, evidence classes, and citations into a saved context pack. Use `--format llms` for an `llms.txt`-style handoff, `context list` to find prior packs, and `context show <id>` to replay one. For longer-running work, `swarmvault task start "<goal>" --target <path-or-node>` creates a durable task ledger, `task update` records notes, decisions, changed paths, and linked packs, and `task resume <id>` prints the next-agent handoff. Existing `memory` commands and `--memory <id>` flags remain supported as compatibility aliases for the same task ledger.
+### Common Next Commands
 
-Need a conversation that survives handoff? `swarmvault chat "What should I do next?"` asks the compiled wiki in a persisted session, writes the transcript to `wiki/outputs/chat-sessions/`, stores structured state in `state/chat-sessions/`, and resumes with `swarmvault chat --resume <id> "follow-up"`. Use `swarmvault chat --list` and `swarmvault chat --delete <id>` to manage saved sessions.
+| Goal | Command |
+| --- | --- |
+| Run the beginner path without opening the viewer | `swarmvault quickstart ./path --no-serve` |
+| Use the older concise alias | `swarmvault scan ./path --no-viz` |
+| Inspect graph freshness | `swarmvault graph status ./src` or `swarmvault check-update ./src` |
+| Refresh code-derived graph artifacts | `swarmvault update ./src` |
+| Recompute graph communities | `swarmvault graph cluster` or `swarmvault cluster-only` |
+| Print graph counts and validate exports | `swarmvault graph stats` and `swarmvault graph validate --strict` |
+| Share the first-run summary | `swarmvault graph share --post`, `swarmvault graph share --svg ./share-card.svg`, or `swarmvault graph share --bundle ./share-kit` |
+| Export for agents or other tools | `swarmvault export ai --out ./exports/ai` |
+| Build bounded agent context | `swarmvault context build "Implement the auth refactor" --target ./src --budget 8000` |
+| Record task history | `swarmvault task start "Implement the auth refactor" --target ./src --agent codex` |
+| Keep a conversation over the vault | `swarmvault chat "How should the next agent use this vault?"` |
+| Open health and repair guidance | `swarmvault doctor --repair` |
+| Build graph exports | `swarmvault graph export --report ./exports/report.html`, `swarmvault graph export --obsidian ./exports/graph-vault`, or `swarmvault graph export --neo4j ./exports/graph.cypher` |
+| Merge or inspect source/module trees | `swarmvault tree --output ./exports/tree.html` and `swarmvault merge-graphs ./exports/graph.json ./other-graph.json --out ./exports/merged-graph.json` |
+| Push graph data to Neo4j | `swarmvault graph push neo4j --dry-run` |
 
-Need a static handoff for another agent or crawler? `swarmvault export ai --out ./exports/ai` writes `llms.txt`, `llms-full.txt`, `graph.jsonld`, `manifest.json`, `ai-readme.md`, and per-page `.txt`/`.json` siblings so the compiled wiki can be consumed without starting a server.
+Want the minimal LLM-Wiki starter instead? `swarmvault init --lite` creates just `raw/`, `wiki/`, `wiki/index.md`, `wiki/log.md`, and `swarmvault.schema.md` - no config, no state, no agent installs.
 
-Need a quick health pass before handing the vault to an agent or opening the viewer? `swarmvault doctor` checks graph, retrieval, review queues, watch status, migration state, managed sources, and task ledgers. Add `--repair` to rebuild safe derived retrieval artifacts. `swarmvault graph serve` surfaces prioritized next actions plus every doctor check in the workbench, with details, copyable suggested commands, safe direct repair, explicit capture modes, title/tag capture fields, context-pack creation, and task-start actions with editable token budgets.
-
-Want the minimal LLM-Wiki starter instead? `swarmvault init --lite` creates just `raw/`, `wiki/`, `wiki/index.md`, `wiki/log.md`, and `swarmvault.schema.md` — no config, no state, no agent installs. Your agent maintains the wiki directly. Upgrade with `swarmvault init` later when you want graph, search, and approvals.
-
-For very large graphs, `swarmvault graph serve` and `swarmvault graph export --html` automatically start in overview mode. Add `--full` when you want the entire canvas rendered anyway.
-
-When the vault lives inside a git repo, `ingest`, `compile`, and `query` also support `--commit` so the resulting `wiki/` and `state/` changes can be committed immediately. `compile --max-tokens <n>` trims lower-priority pages when you need the generated wiki to fit a bounded context window.
-
-`swarmvault init --profile` accepts `default`, `personal-research`, or a comma-separated preset list such as `reader,timeline`. The `personal-research` preset turns on both `profile.guidedIngestDefault` and `profile.deepLintDefault`, so ingest/source and lint flows start in the stronger path unless you pass `--no-guide` or `--no-deep`. For custom vault behavior, edit the `profile` block in `swarmvault.config.json` and keep `swarmvault.schema.md` as the human-written intent layer.
+When the vault lives inside a git repo, `ingest`, `compile`, and `query` support `--commit`. `compile --max-tokens <n>` trims lower-priority pages for bounded context windows. `swarmvault ingest ./customer-call.mp3`, `swarmvault ingest https://www.youtube.com/watch?v=dQw4w9WgXcQ`, and `swarmvault ingest --video https://example.com/product-demo.mp4` cover audio, YouTube transcript, and video workflows when the required providers or helper binaries are available.
 
 <!-- readme-section:provider-setup -->
 ## Optional: Add a Model Provider

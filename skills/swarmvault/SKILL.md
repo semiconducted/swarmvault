@@ -1,7 +1,7 @@
 ---
 name: swarmvault
 description: "Use SwarmVault when the user needs a local-first knowledge vault that writes durable markdown, graph, search, dashboard, review, chat-session, context-pack, task-ledger, static AI export, retrieval, and MCP artifacts to disk from books, notes, transcripts, exports, datasets, slide decks, files, URLs, code, and recurring source workflows."
-version: "3.12.0"
+version: "3.13.0"
 metadata: '{"openclaw":{"requires":{"anyBins":["swarmvault","vault"]},"install":[{"id":"node","kind":"node","package":"@swarmvaultai/cli","bins":["swarmvault","vault"],"label":"Install SwarmVault CLI (npm)"}],"emoji":"🗃️","homepage":"https://www.swarmvault.ai/docs"}}'
 ---
 
@@ -16,6 +16,7 @@ For onboarding, examples, command references, or troubleshooting, read the bundl
 - Work from the vault root.
 - If the vault does not exist yet, run `swarmvault init`.
 - Use `swarmvault demo --no-serve` when the user wants the fastest zero-config walkthrough before pointing SwarmVault at their own sources.
+- Use `swarmvault quickstart <directory-or-github-url>` as the beginner-friendly first-run path when the user wants init + ingest + compile + graph viewer in one command.
 - Use `swarmvault scan <directory-or-github-url> --no-serve`, `swarmvault scan <directory-or-github-url> --no-viz`, or `swarmvault clone <directory-or-github-url> --no-viz` when the user wants the fastest scratch pass over a local repo, public GitHub repo, or docs tree without manually stepping through init + ingest + compile first; for GitHub URLs add `--branch`, `--ref`, or `--checkout-dir` when the user needs a pinned checkout. Use `scan --mcp` or `clone --mcp` when the next step should be an MCP stdio server. Use `swarmvault graph share --post` for copyable text, `swarmvault graph share --svg [path]` for a visual card, or `swarmvault graph share --bundle [dir]` for a portable folder with markdown, post text, SVG, HTML preview, and JSON metadata.
 - Use `swarmvault context build "<goal>" --target <path-or-node> --budget <tokens>` when the next agent, review, or handoff needs a bounded evidence pack instead of a broad vault search.
 - Use `swarmvault chat "question"` when a multi-turn conversation should survive handoff; resume with `swarmvault chat --resume <id> "follow-up"` and inspect saved transcripts under `wiki/outputs/chat-sessions/`.

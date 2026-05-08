@@ -29,69 +29,44 @@ The smoke parses `packages/cli/src/index.ts` with the TypeScript compiler API, c
 
 ## First Run
 
+Start in an empty folder or scratch folder:
+
 ```bash
 mkdir my-vault
 cd my-vault
-swarmvault init --obsidian --profile personal-research
-swarmvault init --obsidian --profile reader,timeline
-swarmvault demo
-swarmvault source add https://github.com/karpathy/micrograd
-swarmvault source add https://github.com/owner/repo --branch main --checkout-dir .swarmvault-checkouts/repo
-swarmvault source add https://example.com/docs/getting-started
-swarmvault source add ./exports/customer-call.srt --guide
-swarmvault source session file-customer-call-srt-12345678
-swarmvault source list
-swarmvault source reload --all
-sed -n '1,120p' swarmvault.schema.md
-swarmvault ingest ./notes.md
-swarmvault ingest ./customer-call.mp3
-swarmvault ingest https://www.youtube.com/watch?v=dQw4w9WgXcQ
-swarmvault ingest --video https://example.com/product-demo.mp4
-swarmvault ingest ./repo
-swarmvault add https://arxiv.org/abs/2401.12345
-swarmvault compile --max-tokens 120000
-swarmvault diff
-swarmvault graph share --post
-swarmvault graph share --svg ./share-card.svg
-swarmvault graph share --bundle ./share-kit
-swarmvault benchmark
-swarmvault query "What keeps recurring?" --commit
-swarmvault chat "What should the next agent know?"
-swarmvault chat --resume <session-id> "What changed?"
-swarmvault export ai --out ./exports/ai
-swarmvault context build "Ship this feature safely" --target ./src --budget 8000
-swarmvault task start "Ship this feature safely" --target ./src --agent codex
-swarmvault retrieval status
-swarmvault doctor --repair
-swarmvault query "Turn this into slides" --format slides
-swarmvault explore "What should I research next?" --steps 3
-swarmvault lint --deep
-swarmvault graph blast ./src/index.ts
-swarmvault graph status ./src
-swarmvault check-update ./src
-swarmvault graph stats
-swarmvault graph validate --strict
-swarmvault graph update .
-swarmvault update .
-swarmvault graph cluster
-swarmvault cluster-only
-swarmvault graph tree --output ./exports/tree.html
-swarmvault tree --output ./exports/tree.html
-swarmvault graph query "Which nodes bridge the biggest clusters?"
-swarmvault graph explain "concept:drift"
-swarmvault watch status
-swarmvault watch --repo --once
-swarmvault hook install
-swarmvault graph serve
-swarmvault graph export --report ./exports/report.html
-swarmvault graph export --html ./exports/graph.html
-swarmvault graph export --cypher ./exports/graph.cypher
-swarmvault graph export --neo4j ./exports/graph.cypher
-swarmvault graph merge ./exports/graph.json ./other-graph.json --out ./exports/merged-graph.json
-swarmvault merge-graphs ./exports/graph.json ./other-graph.json --out ./exports/merged-graph.json
-swarmvault graph push neo4j --dry-run
-swarmvault clone https://github.com/owner/repo --no-viz
+swarmvault quickstart ../your-repo
 ```
+
+That single command initializes a vault, ingests the input, compiles the wiki and graph, writes share artifacts, and opens the local graph viewer. It is the beginner-friendly alias for `swarmvault scan`.
+
+No input ready yet?
+
+```bash
+swarmvault demo
+```
+
+After the first compile, use:
+
+```bash
+swarmvault query "What are the key concepts?"
+swarmvault graph serve
+swarmvault doctor
+swarmvault candidate list
+```
+
+Use the step-by-step flow when you want more control:
+
+```bash
+swarmvault init --obsidian --profile personal-research
+swarmvault ingest ./src --repo-root .
+swarmvault ingest ./meeting.srt --guide
+swarmvault add https://arxiv.org/abs/2401.12345
+swarmvault compile
+swarmvault query "What is the auth flow?"
+swarmvault graph serve
+```
+
+Use `source add` for recurring inputs (`swarmvault source add https://github.com/karpathy/micrograd`, `swarmvault source add https://example.com/docs/getting-started`, `swarmvault source list`, `swarmvault source reload --all`, and `swarmvault source session file-customer-call-srt-12345678`). Use advanced graph/context surfaces when needed: `swarmvault graph status ./src`, `swarmvault check-update ./src`, `swarmvault update ./src`, `swarmvault graph stats`, `swarmvault graph validate --strict`, `swarmvault graph cluster`, `swarmvault cluster-only`, `swarmvault tree --output ./exports/tree.html`, `swarmvault export ai --out ./exports/ai`, `swarmvault context build "Ship this feature safely" --target ./src --budget 8000`, and `swarmvault task start "Ship this feature safely" --target ./src --agent codex`.
 
 ## Commands
 
@@ -115,6 +90,19 @@ The schema file is the vault-specific instruction layer. Edit it to define namin
 Set `SWARMVAULT_OUT=<dir>` when generated artifacts should be isolated from the project root. Config and schema files stay at the root; relative `raw/`, `wiki/`, `state/`, `agent/`, and `inbox/` workspace directories resolve under the output root.
 
 `--profile` accepts `default`, `personal-research`, or a comma-separated preset list such as `reader,timeline`. For fully custom vault behavior, edit the `profile` block in `swarmvault.config.json`; that deterministic profile layer works alongside the human-written `swarmvault.schema.md`. The `personal-research` preset also sets `profile.guidedIngestDefault: true` and `profile.deepLintDefault: true`, so guided ingest/source and lint flows are on by default until you override them with `--no-guide` or `--no-deep`.
+
+### `swarmvault quickstart <directory|github-url> [--port <port>] [--no-serve] [--no-viz] [--mcp] [--branch <name>] [--ref <ref>] [--checkout-dir <path>]`
+
+Beginner-friendly alias for `swarmvault scan`.
+
+- initializes the current directory as a SwarmVault workspace
+- ingests the supplied local directory, or registers/syncs the supplied public GitHub repo root URL
+- compiles wiki, graph, search, and share artifacts immediately
+- prints the generated `raw/`, `wiki/`, `state/graph.json`, and `wiki/graph/` paths in human output
+- starts `graph serve` unless you pass `--no-serve` or `--no-viz`
+- keeps the same JSON output contract as `scan`
+
+Use this as the default first-run command in docs and onboarding.
 
 ### `swarmvault scan <directory|github-url> [--port <port>] [--no-serve] [--no-viz] [--mcp] [--branch <name>] [--ref <ref>] [--checkout-dir <path>]`
 

@@ -25,7 +25,8 @@ Expected shape:
 
 - initializes or confirms the vault
 - may use `swarmvault demo --no-serve` for the fastest zero-config walkthrough
-- may use `swarmvault scan <directory> --no-serve` when the task is a quick local repo walkthrough
+- may use `swarmvault quickstart <directory> --no-serve` as the beginner path for a quick local repo walkthrough
+- may use `swarmvault scan <directory> --no-serve` when the user asks for the older concise scan command
 - points at `swarmvault.schema.md`
 - mentions `wiki/` and `state/`
 - prefers `wiki/graph/report.md` once compile exists

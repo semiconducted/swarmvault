@@ -4,6 +4,8 @@
 
 ```bash
 swarmvault demo --no-serve
+swarmvault quickstart ./apps/api
+swarmvault quickstart ./apps/api --no-serve
 swarmvault init
 swarmvault init --obsidian --profile personal-research
 swarmvault init --obsidian --profile reader,timeline

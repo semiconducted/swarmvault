@@ -188,8 +188,8 @@ try {
     const sharePreview = await fs.readFile(defaultShareKit.bundleFiles.previewHtmlPath, "utf8");
     assert.ok(sharePreview.includes("<!doctype html>"), "share kit preview is not an HTML document");
     assert.ok(
-      sharePreview.includes("npm install -g @swarmvaultai/cli && swarmvault scan ./your-repo"),
-      "share kit preview does not include the install/scan CTA"
+      sharePreview.includes("npm install -g @swarmvaultai/cli && swarmvault quickstart ./your-repo"),
+      "share kit preview does not include the install/quickstart CTA"
     );
     const customShareKitPath = path.join(workspaceDir, "exports", "share-kit");
     const customShareKit = await runCliJson(["graph", "share", "--bundle", customShareKitPath]);

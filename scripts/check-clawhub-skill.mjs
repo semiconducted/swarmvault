@@ -24,6 +24,7 @@ const requiredReadmeSubstrings = [
   "swarmvault --version",
   "clawhub update swarmvault",
   "npm install -g @swarmvaultai/cli@latest",
+  "swarmvault quickstart",
   "swarmvault init",
   "swarmvault ingest",
   ".epub",

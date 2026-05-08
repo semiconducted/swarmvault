@@ -17,6 +17,7 @@ Install the CLI it depends on:
 ```bash
 npm install -g @swarmvaultai/cli
 swarmvault --version
+swarmvault quickstart ./your-repo
 swarmvault demo --no-serve
 swarmvault source add https://github.com/karpathy/micrograd
 swarmvault ingest ./meeting.srt --guide
@@ -52,9 +53,10 @@ npm install -g @swarmvaultai/cli@latest
 ## Quickstart
 
 ```bash
-swarmvault init --obsidian --profile personal-research
-swarmvault init --obsidian --profile reader,timeline
+swarmvault quickstart ./your-repo
+swarmvault quickstart ./your-repo --no-serve
 swarmvault demo --no-serve
+swarmvault init --obsidian --profile personal-research
 swarmvault source add ./exports/customer-call.srt --guide
 swarmvault source session file-customer-call-srt-12345678
 swarmvault source add https://github.com/karpathy/micrograd
@@ -94,7 +96,7 @@ swarmvault clone https://github.com/owner/repo --no-viz
 swarmvault mcp
 ```
 
-For the fastest scratch walkthrough of a local repo, public GitHub repo, or docs tree, run `swarmvault scan ./path --no-serve`, `swarmvault scan ./path --no-viz`, or `swarmvault clone https://github.com/owner/repo --branch main --no-viz`. It initializes the current directory as a vault, ingests that input, compiles immediately, leaves the graph viewer closed when you only need the generated artifacts, and writes `wiki/graph/share-card.md`, `wiki/graph/share-card.svg`, and `wiki/graph/share-kit/`. Use `scan --mcp` or `clone --mcp` when the next step should be an MCP stdio server.
+For the fastest scratch walkthrough of a local repo, public GitHub repo, or docs tree, run `swarmvault quickstart ./path`, `swarmvault quickstart ./path --no-serve`, `swarmvault scan ./path --no-viz`, or `swarmvault clone https://github.com/owner/repo --branch main --no-viz`. `quickstart` is the beginner-friendly alias for `scan`: it initializes the current directory as a vault, ingests that input, compiles immediately, opens the graph viewer by default, and writes `wiki/graph/share-card.md`, `wiki/graph/share-card.svg`, and `wiki/graph/share-kit/`. Use `quickstart --mcp`, `scan --mcp`, or `clone --mcp` when the next step should be an MCP stdio server.
 
 If you want the same zero-config walkthrough without supplying your own inputs first, run `swarmvault demo --no-serve`. It creates a temporary demo vault with bundled sources and compiles it immediately.
 

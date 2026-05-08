@@ -148,7 +148,7 @@ describe("graph share card", () => {
     expect(artifact.overview.sources).toBe(1);
     expect(artifact.highlights.topHubs[0]?.label).toBe("Knowledge Compiler");
     expect(artifact.shortPost).toContain("1 sources -> 2 wiki pages");
-    expect(artifact.shortPost).toContain("swarmvault scan ./your-repo");
+    expect(artifact.shortPost).toContain("swarmvault quickstart ./your-repo");
   });
 
   it("renders markdown with a copyable share post and reproduce commands", () => {
@@ -192,7 +192,7 @@ describe("graph share card", () => {
     expect(html).toContain("I scanned demo-vault with SwarmVault");
     expect(html).toContain("1 sources -&gt; 2 wiki pages");
     expect(html).toContain("Top hubs: Knowledge &lt;script&gt;alert(1)&lt;/script&gt;");
-    expect(html).toContain("npm install -g @swarmvaultai/cli && swarmvault scan ./your-repo");
+    expect(html).toContain("npm install -g @swarmvaultai/cli && swarmvault quickstart ./your-repo");
     expect(html).toContain("Knowledge &lt;script&gt;alert(1)&lt;/script&gt;");
     expect(html).not.toContain("<script>alert(1)</script>");
   });

@@ -6,6 +6,8 @@ Use this when the user needs the shortest path from install to a working vault.
 
 ```bash
 npm install -g @swarmvaultai/cli
+swarmvault quickstart ./repo
+swarmvault quickstart ./repo --no-serve
 swarmvault demo --no-serve
 swarmvault init --obsidian
 swarmvault scan ./repo --no-serve
@@ -46,7 +48,7 @@ swarmvault export ai --out ./exports/ai
 
 - `swarmvault.schema.md` exists and reflects the vault contract
 - `demo --no-serve` leaves a temporary compiled vault behind even on a clean machine
-- `scan --no-serve`, `scan --no-viz`, and `clone --no-viz` leave a compiled vault behind even when the viewer is not launched
+- `quickstart`, `quickstart --no-serve`, `scan --no-serve`, `scan --no-viz`, and `clone --no-viz` leave a compiled vault behind even when the viewer is not launched
 - `state/sources.json` contains the managed source registry entry
 - `wiki/graph/report.md` exists after compile
 - `graph status` and `check-update` report whether tracked repo changes need `graph update`/`update` or a full `compile` without writing watch state
