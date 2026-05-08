@@ -55,7 +55,7 @@
     "chokidar": "^4.0.3",
     "compromise": "^14.14.4",
     "csv-parse": "^6.2.1",
-    "fast-xml-parser": "^5.5.11",
+    "fast-xml-parser": "^5.7.0",
     "fflate": "^0.8.2",
     "graphology": "^0.26.0",
     "graphology-communities-louvain": "^2.0.2",
